@@ -1,5 +1,5 @@
 {
-    "name": "sl/invoices",
+    "name": "slll/invoices",
     "description": "Generate PDF invoices for your customers in laravel",
     "type": "library",
     "keywords": [
