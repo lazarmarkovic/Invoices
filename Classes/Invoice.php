@@ -24,165 +24,67 @@ class Invoice
 {
     use Setters;
 
-    /**
-     * Invoice name.
-     *
-     * @var string
-     */
-    public $name;
-
-    /**
-     * Invoice template.
-     *
-     * @var string
-     */
     public $template;
 
-    /**
-     * Invoice item collection.
-     *
-     * @var Illuminate\Support\Collection
-     */
-    public $items;
-
-    /**
-     * Invoice currency.
-     *
-     * @var string
-     */
-    public $currency;
-
-    /**
-     * Invoice tax.
-     *
-     * @var int
-     */
-    public $tax;
-
-    /**
-     * Invoice tax type.
-     *
-     * @var string
-     */
-    public $tax_type;
-
-    /**
-     * Invoice number.
-     *
-     * @var int
-     */
     public $number = null;
-
-    /**
-     * Invoice decimal precision.
-     *
-     * @var int
-     */
-    public $decimals;
-
-    /**
-     * Invoice logo.
-     *
-     * @var string
-     */
-    public $logo;
-
-    /**
-     * Invoice Logo Height.
-     *
-     * @var int
-     */
+    public $name;
+    public $date;
+    public $logo_file;
+    public $logo_path;
     public $logo_height;
 
-    /**
-     * Invoice Date.
-     *
-     * @var Carbon\Carbon
-     */
-    public $date;
-
-    /**
-     * Invoice Notes.
-     *
-     * @var string
-     */
-    public $notes;
-
-    /**
-     * Invoice Business Details.
-     *
-     * @var array
-     */
     public $business_details;
-
-    /**
-     * Invoice Customer Details.
-     *
-     * @var array
-     */
     public $customer_details;
+    public $items;
 
-    /**
-     * Invoice Footnote.
-     *
-     * @var array
-     */
-    public $footnote;
+    public $decimals;
+    public $currency;
+    public $discount;
+    public $discount_price;
+    public $subtotal;
+    public $total;
 
-    /**
-     * Stores the PDF object.
-     *
-     * @var Dompdf\Dompdf
-     */
+    public $remarks;
+
+    public $header;
+    public $footer;
+
     private $pdf;
 
-    /**
-     * Create a new invoice instance.
-     *
-     * @method __construct
-     *
-     * @param string $name
-     */
+
     public function __construct($name = 'Invoice')
     {
-        $this->name = $name;
         $this->template = 'default';
-        $this->items = Collection::make([]);
-        $this->currency = config('invoices.currency');
-        $this->tax = config('invoices.tax');
-        $this->tax_type = config('invoices.tax_type');
-        $this->decimals = config('invoices.decimals');
-        $this->logo = config('invoices.logo');
-        $this->logo_height = config('invoices.logo_height');
+
+        $this->name = $name;
         $this->date = Carbon::now();
-        $this->business_details = Collection::make(config('invoices.business_details'));
+        $this->logo_file = null;
+        $this->logo_path = "";
+        $this->logo_height = config('invoices.logo_height');
+
+        $this->business_details = Collection::make([]);
         $this->customer_details = Collection::make([]);
-        $this->footnote = config('invoices.footnote');
+        $this->items = Collection::make([]);
+
+        $this->decimals = config('invoices.decimals');
+        $this->currency = config('invoices.currency');
+        $this->discount = config('invoices.discount');
+        $this->discount_price = config('invoices.discount_price');
+        $this->total = config('invoices.total');
+        $this->subtotal = config('invoices.subtotal');
+
+        $this->remarks = config('invoices.remarks');
+
+        $this->header = config('invoices.header');
+        $this->footer = config('invoices.footer');
     }
 
-    /**
-     * Return a new instance of Invoice.
-     *
-     * @method make
-     *
-     * @param string $name
-     *
-     * @return ConsoleTVs\Invoices\Classes\Invoice
-     */
+
     public static function make($name = 'Invoice')
     {
         return new self($name);
     }
 
-    /**
-     * Select template for invoice.
-     *
-     * @method template
-     *
-     * @param string $template
-     *
-     * @return self
-     */
     public function template($template = 'default')
     {
         $this->template = $template;
@@ -190,52 +92,18 @@ class Invoice
         return $this;
     }
 
-    /**
-     * Adds an item to the invoice.
-     *
-     * @method addItem
-     *
-     * @param string $name
-     * @param int    $price
-     * @param int    $ammount
-     * @param string $id
-     *
-     * @return self
-     */
-    public function addItem($name, $price, $ammount = 1, $id = '-')
+    public function addItem($name, $amount = 1, $subtotalPrice, $totalPrice)
     {
         $this->items->push(Collection::make([
-            'name'       => $name,
-            'price'      => $price,
-            'ammount'    => $ammount,
-            'totalPrice' => number_format(bcmul($price, $ammount, $this->decimals), $this->decimals),
-            'id'         => $id,
+            'name'          => $name,
+            'amount'        => $amount,
+            'subtotalPrice' => $subtotalPrice,
+            'totalPrice'    => number_format($totalPrice, $this->decimals),
         ]));
 
         return $this;
     }
 
-    /**
-     * Pop the last invoice item.
-     *
-     * @method popItem
-     *
-     * @return self
-     */
-    public function popItem()
-    {
-        $this->items->pop();
-
-        return $this;
-    }
-
-    /**
-     * Return the currency object.
-     *
-     * @method formatCurrency
-     *
-     * @return stdClass
-     */
     public function formatCurrency()
     {
         $currencies = json_decode(file_get_contents(__DIR__.'/../Currencies.json'));
@@ -244,91 +112,27 @@ class Invoice
         return $currencies->$currency;
     }
 
-    /**
-     * Return the subtotal invoice price.
-     *
-     * @method subTotalPrice
-     *
-     * @return int
-     */
-    private function subTotalPrice()
+    public function discountFormatted()
     {
-        return $this->items->sum(function ($item) {
-            return bcmul($item['price'], $item['ammount'], $this->decimals);
-        });
+        return number_format($this->discount, $this->decimals);
     }
 
-    /**
-     * Return formatted sub total price.
-     *
-     * @method subTotalPriceFormatted
-     *
-     * @return int
-     */
+    public function discountPriceFormatted()
+    {
+        return number_format($this->discount_price, $this->decimals);
+    }
+
     public function subTotalPriceFormatted()
     {
-        return number_format($this->subTotalPrice(), $this->decimals);
+        return number_format($this->subtotal, $this->decimals);
     }
 
-    /**
-     * Return the total invoce price after aplying the tax.
-     *
-     * @method totalPrice
-     *
-     * @return int
-     */
-    private function totalPrice()
-    {
-        return bcadd($this->subTotalPrice(), $this->taxPrice(), $this->decimals);
-    }
-
-    /**
-     * Return formatted total price.
-     *
-     * @method totalPriceFormatted
-     *
-     * @return int
-     */
     public function totalPriceFormatted()
     {
-        return number_format($this->totalPrice(), $this->decimals);
+        return number_format($this->total, $this->decimals);
     }
 
-    /**
-     * taxPrice.
-     *
-     * @method taxPrice
-     *
-     * @return float
-     */
-    private function taxPrice()
-    {
-        if ($this->tax_type == 'percentage') {
-            return bcdiv(bcmul($this->tax, $this->subTotalPrice(), $this->decimals), 100, $this->decimals);
-        }
 
-        return $this->tax;
-    }
-
-    /**
-     * Return formatted tax.
-     *
-     * @method taxPriceFormatted
-     *
-     * @return int
-     */
-    public function taxPriceFormatted()
-    {
-        return number_format($this->taxPrice(), $this->decimals);
-    }
-
-    /**
-     * Generate the PDF.
-     *
-     * @method generate
-     *
-     * @return self
-     */
     private function generate()
     {
         $this->pdf = PDF::generate($this, $this->template);
@@ -336,15 +140,6 @@ class Invoice
         return $this;
     }
 
-    /**
-     * Downloads the generated PDF.
-     *
-     * @method download
-     *
-     * @param string $name
-     *
-     * @return response
-     */
     public function download($name = 'invoice')
     {
         $this->generate();
@@ -352,14 +147,6 @@ class Invoice
         return $this->pdf->stream($name);
     }
 
-    /**
-     * Save the generated PDF.
-     *
-     * @method save
-     *
-     * @param string $name
-     *
-     */
     public function save($name = 'invoice.pdf')
     {
         $invoice = $this->generate();
@@ -367,19 +154,15 @@ class Invoice
         Storage::put($name, $invoice->pdf->output());
     }
 
-    /**
-     * Show the PDF in the browser.
-     *
-     * @method show
-     *
-     * @param string $name
-     *
-     * @return response
-     */
     public function show($name = 'invoice')
     {
         $this->generate();
 
         return $this->pdf->stream($name, ['Attachment' => false]);
+    }
+
+    public function getFile() {
+        $invoice = $this->generate();
+        return $invoice->pdf->output();
     }
 }

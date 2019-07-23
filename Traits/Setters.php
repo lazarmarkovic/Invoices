@@ -20,15 +20,6 @@ use Illuminate\Support\Collection;
  */
 trait Setters
 {
-    /**
-     * Set the invoice name.
-     *
-     * @method name
-     *
-     * @param string $name
-     *
-     * @return self
-     */
     public function name($name)
     {
         $this->name = $name;
@@ -36,15 +27,6 @@ trait Setters
         return $this;
     }
 
-    /**
-     * Set the invoice number.
-     *
-     * @method number
-     *
-     * @param int $number
-     *
-     * @return self
-     */
     public function number($number)
     {
         $this->number = $number;
@@ -52,15 +34,6 @@ trait Setters
         return $this;
     }
 
-    /**
-     * Set the invoice decimal precision.
-     *
-     * @method decimals
-     *
-     * @param int $decimals
-     *
-     * @return self
-     */
     public function decimals($decimals)
     {
         $this->decimals = $decimals;
@@ -68,63 +41,56 @@ trait Setters
         return $this;
     }
 
-    /**
-     * Set the invoice tax.
-     *
-     * @method tax
-     *
-     * @param float $tax
-     *
-     * @return self
-     */
-    public function tax($tax)
+    public function discount($discount)
     {
-        $this->tax = $tax;
+        $this->discount = $discount;
 
         return $this;
     }
 
-    /**
-     * Set the invoice tax type.
-     *
-     * @method taxType
-     *
-     * @param string $tax_type
-     *
-     * @return self
-     */
-    public function taxType($tax_type)
+    public function discountPrice($discount_price)
     {
-        $this->tax_type = $tax_type;
+        $this->discount_price = $discount_price;
 
         return $this;
     }
 
-    /**
-     * Set the invoice logo URL.
-     *
-     * @method logo
-     *
-     * @param string $logo_url
-     *
-     * @return self
-     */
-    public function logo($logo_url)
+    public function subtotal($subtotal)
     {
-        $this->logo = $logo_url;
+        $this->subtotal = $subtotal;
 
         return $this;
     }
 
-    /**
-     * Set the invoice date.
-     *
-     * @method date
-     *
-     * @param Carbon $date
-     *
-     * @return self
-     */
+    public function total($total)
+    {
+        $this->total = $total;
+
+        return $this;
+    }
+
+    public function logoFile($logo_file)
+    {
+        $this->logo_file = $logo_file;
+
+        return $this;
+    }
+
+    public function logoPath($logo_path)
+    {
+        $this->logo_path = $logo_path;
+
+        return $this;
+    }
+
+    public function logoHeight($logo_height)
+    {
+        $this->logo_height = $logo_height;
+
+        return $this;
+    }
+
+
     public function date(Carbon $date)
     {
         $this->date = $date;
@@ -132,31 +98,13 @@ trait Setters
         return $this;
     }
 
-    /**
-     * Set the invoice notes.
-     *
-     * @method notes
-     *
-     * @param string $notes
-     *
-     * @return self
-     */
-    public function notes($notes)
+    public function remarks($remarks)
     {
-        $this->notes = $notes;
+        $this->remarks = $remarks;
 
         return $this;
     }
 
-    /**
-     * Set the invoice business details.
-     *
-     * @method business
-     *
-     * @param array $details
-     *
-     * @return self
-     */
     public function business($details)
     {
         $this->business_details = Collection::make($details);
@@ -164,15 +112,6 @@ trait Setters
         return $this;
     }
 
-    /**
-     * Set the invoice customer details.
-     *
-     * @method customer
-     *
-     * @param array $details
-     *
-     * @return self
-     */
     public function customer($details)
     {
         $this->customer_details = Collection::make($details);
@@ -180,15 +119,6 @@ trait Setters
         return $this;
     }
 
-    /**
-     * Set the invoice currency.
-     *
-     * @method currency
-     *
-     * @param string $currency
-     *
-     * @return self
-     */
     public function currency($currency)
     {
         $this->currency = $currency;
@@ -196,18 +126,16 @@ trait Setters
         return $this;
     }
 
-    /**
-     * Set the invoice footnote.
-     *
-     * @method footnote
-     *
-     * @param string $footnote
-     *
-     * @return self
-     */
-    public function footnote($footnote)
+    public function header($header)
     {
-        $this->footnote = $footnote;
+        $this->header = $header;
+
+        return $this;
+    }
+
+    public function footer($footer)
+    {
+        $this->footer = $footer;
 
         return $this;
     }
