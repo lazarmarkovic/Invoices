@@ -48,11 +48,13 @@
     </footer>
     <main>
         <div style="clear:both; position:relative;">
-            <div style="position:absolute; left:0pt; width:250pt;">
-                <img class="img-rounded"
-                     height="{{ $invoice->logo_height }}"
-                     src="{{ 'data:image/' . explode('.', $invoice->logo_path)[1] . ';base64,' . base64_encode($invoice->logo_file) }}">
-            </div>
+            @if ($invoice->logo_path != "")
+                <div style="position:absolute; left:0pt; width:250pt;">
+                    <img class="img-rounded"
+                         height="{{ $invoice->logo_height }}"
+                         src="{{ 'data:image/' . explode('.', $invoice->logo_path)[1] . ';base64,' . base64_encode($invoice->logo_file) }}">
+                </div>
+            @endif
             <div style="margin-left:300pt;">
                 <b>Date: </b> {{ $invoice->date->formatLocalized('%A %d %B %Y') }}<br />
                 @if ($invoice->number)
