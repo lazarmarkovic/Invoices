@@ -94,7 +94,7 @@
                         Phone: {{ $invoice->customer_details->get('contact_phone') }}<br />
                         Email: {{ $invoice->customer_details->get('email') }}<br />
                         {{ $invoice->customer_details->get('street_address') }}<br />
-                        {{ $invoice->customer_details->get('postal_code') }} {{ $invoice->business_details->get('city') }} {{ $invoice->business_details->get('region') }}
+                        {{ $invoice->customer_details->get('postal_code') }} {{ $invoice->customer_details->get('city') }} {{ $invoice->customer_details->get('region') }}
                         {{ $invoice->customer_details->get('country') }}<br />
                     </div>
                 </div>
